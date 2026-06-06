@@ -113,7 +113,9 @@ const mapCorridor = (r: any): Corridor => ({
 const mapOrder = (r: any): Order => ({
   id: r.id, customerId: r.customer_id, merchantId: r.merchant_id,
   originSiteId: r.origin_site_id, destSiteId: r.dest_site_id,
+  category: r.category ?? null,
   cargoDescription: r.cargo_description, weightKg: Number(r.weight_kg),
+  priority: !!r.priority,
   status: r.status, flightId: r.flight_id, priceCentavos: r.price_centavos,
   createdAt: r.created_at,
 });

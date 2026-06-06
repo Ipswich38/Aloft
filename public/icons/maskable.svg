@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- full-bleed background for maskable safe zone -->
-  <rect width="512" height="512" fill="#0ea5e9"/>
+  <rect width="512" height="512" fill="#0f9d77"/>
   <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
     <line x1="256" y1="256" x2="176" y2="176"/>
     <line x1="256" y1="256" x2="336" y2="176"/>

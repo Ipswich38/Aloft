@@ -6,12 +6,15 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getCorridors } from "@/lib/data";
 import { checkPayload } from "@/lib/flycart";
 import { quote } from "@/lib/pricing";
+import { CATEGORY_LABELS } from "@/lib/categories";
 
 const schema = z.object({
   corridorId: z.string().min(1, "Choose a route."),
-  cargoDescription: z.string().min(3, "Describe the cargo."),
+  category: z.enum(["food", "groceries", "parcel", "medicine"]),
+  cargoDescription: z.string().optional(),
   weightKg: z.coerce.number().positive("Weight must be greater than 0."),
   coldChain: z.union([z.literal("on"), z.null()]).optional(),
+  priority: z.union([z.literal("on"), z.null()]).optional(),
 });
 
 export type BookingState = { error?: string } | undefined;
@@ -22,9 +25,11 @@ export async function createOrder(
 ): Promise<BookingState> {
   const parsed = schema.safeParse({
     corridorId: formData.get("corridorId"),
+    category: formData.get("category"),
     cargoDescription: formData.get("cargoDescription"),
     weightKg: formData.get("weightKg"),
     coldChain: formData.get("coldChain"),
+    priority: formData.get("priority"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -41,14 +46,17 @@ export async function createOrder(
   });
   if (!check.ok) return { error: check.reasons.join(" ") };
 
+  const isPriority = parsed.data.priority === "on";
   const priceCentavos = quote({
     distanceKm: corridor.distanceKm,
     weightKg: parsed.data.weightKg,
     coldChain: parsed.data.coldChain === "on",
+    priority: isPriority,
   });
+  const cargo =
+    parsed.data.cargoDescription?.trim() || CATEGORY_LABELS[parsed.data.category];
 
   if (!isSupabaseConfigured()) {
-    // Demo mode: nothing to persist; bounce back to the list.
     redirect("/customer?booked=demo");
   }
 
@@ -62,8 +70,10 @@ export async function createOrder(
     customer_id: user.id,
     origin_site_id: corridor.originSiteId,
     dest_site_id: corridor.destSiteId,
-    cargo_description: parsed.data.cargoDescription,
+    category: parsed.data.category,
+    cargo_description: cargo,
     weight_kg: parsed.data.weightKg,
+    priority: isPriority,
     status: "submitted",
     price_centavos: priceCentavos,
   });

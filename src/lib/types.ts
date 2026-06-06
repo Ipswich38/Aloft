@@ -1,7 +1,8 @@
 import type { FlyCartModel } from "./flycart";
 import type { AppRole } from "./site-config";
+import type { DeliveryCategoryId } from "./categories";
 
-export type { AppRole, FlyCartModel };
+export type { AppRole, FlyCartModel, DeliveryCategoryId };
 
 export type OrderStatus =
   | "draft" // customer is composing
@@ -79,8 +80,10 @@ export interface Order {
   merchantId: string | null;
   originSiteId: string;
   destSiteId: string;
+  category: DeliveryCategoryId | null;
   cargoDescription: string;
   weightKg: number;
+  priority: boolean;
   status: OrderStatus;
   flightId: string | null;
   priceCentavos: number | null;

@@ -35,9 +35,11 @@ export const demoOperatorCredentials = [
 ];
 
 export const demoOrders: Order[] = [
-  { id: "ord-1001", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-2", cargoDescription: "Vaccines (cold chain) ×2 boxes", weightKg: 4.5, status: "in_flight", flightId: "flt-1", priceCentavos: 185000, createdAt: "2026-06-06T01:10:00Z" },
-  { id: "ord-1002", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-3", cargoDescription: "Lab samples — STAT", weightKg: 1.2, status: "accepted", flightId: null, priceCentavos: 145000, createdAt: "2026-06-06T02:05:00Z" },
-  { id: "ord-1003", customerId: "demo-customer", merchantId: null, originSiteId: "site-1", destSiteId: "site-4", cargoDescription: "Maintenance meds resupply", weightKg: 8.0, status: "submitted", flightId: null, priceCentavos: null, createdAt: "2026-06-06T03:20:00Z" },
+  { id: "ord-1001", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-2", category: "medicine", cargoDescription: "Vaccines (cold chain) ×2 boxes", weightKg: 4.5, priority: true, status: "in_flight", flightId: "flt-1", priceCentavos: 185000, createdAt: "2026-06-06T01:10:00Z" },
+  { id: "ord-1002", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-3", category: "medicine", cargoDescription: "Lab samples — STAT", weightKg: 1.2, priority: true, status: "accepted", flightId: null, priceCentavos: 145000, createdAt: "2026-06-06T02:05:00Z" },
+  { id: "ord-1003", customerId: "demo-customer", merchantId: null, originSiteId: "site-1", destSiteId: "site-4", category: "groceries", cargoDescription: "Rice, canned goods, eggs", weightKg: 8.0, priority: false, status: "submitted", flightId: null, priceCentavos: null, createdAt: "2026-06-06T03:20:00Z" },
+  { id: "ord-1000", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-2", category: "food", cargoDescription: "Lechon + sides (hot bag)", weightKg: 2.0, priority: true, status: "delivered", flightId: null, priceCentavos: 156000, createdAt: "2026-06-03T22:40:00Z" },
+  { id: "ord-0999", customerId: "demo-customer", merchantId: "demo-merchant", originSiteId: "site-1", destSiteId: "site-3", category: "parcel", cargoDescription: "Signed documents (envelope)", weightKg: 0.3, priority: false, status: "delivered", flightId: null, priceCentavos: 124000, createdAt: "2026-06-01T09:15:00Z" },
 ];
 
 export interface DemoFlight {

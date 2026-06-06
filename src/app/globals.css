@@ -4,11 +4,11 @@
    Premium, approachable, accessible. Near-black "ink" primary for strong
    contrast (WCAG AA), sky as the brand accent, warm-neutral canvas. */
 @theme {
-  /* Brand (sky) */
-  --color-brand: #0284c7; /* sky-600 — identity */
-  --color-brand-strong: #0369a1; /* sky-700 — accessible on white text */
-  --color-brand-soft: #e0f2fe; /* sky-100 — tints, active states */
-  --color-accent: #f59e0b; /* amber — payload / cargo highlight */
+  /* Brand (emerald — "delivered by air") */
+  --color-brand: #0f9d77; /* emerald — identity */
+  --color-brand-strong: #0a7d5e; /* darker emerald — accessible on white text */
+  --color-brand-soft: #d8f3ea; /* light emerald — tints, active states */
+  --color-accent: #f59e0b; /* amber — destination pin / cargo highlight */
 
   /* Neutrals */
   --color-ink: #0b1220; /* primary text + primary buttons */

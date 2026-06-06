@@ -130,3 +130,56 @@ export function ListIcon(p: IconProps) {
     </svg>
   );
 }
+
+export function UtensilsIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M5 3v7a2 2 0 0 0 4 0V3M7 10v11" />
+      <path d="M17 3c-1.7 0-3 1.8-3 4s1.3 4 3 4v10" />
+    </svg>
+  );
+}
+
+export function BagIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M6 8h12l-1 12H7L6 8Z" />
+      <path d="M9 8a3 3 0 0 1 6 0" />
+    </svg>
+  );
+}
+
+export function CrossIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7V3Z" />
+    </svg>
+  );
+}
+
+export function StarIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6L12 16.8 6.6 19.6l1-6L3.3 9.4l6-.9L12 3Z" />
+    </svg>
+  );
+}
+
+export function CopyIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+    </svg>
+  );
+}
+
+export function SignalIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M5 13a8 8 0 0 1 14 0" />
+      <path d="M8.5 14.5a4 4 0 0 1 7 0" />
+      <circle cx="12" cy="18" r="1.2" />
+    </svg>
+  );
+}

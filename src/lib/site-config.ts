@@ -4,11 +4,12 @@
  */
 export const siteConfig = {
   name: "Aloft",
-  tagline: "Drone delivery for the Philippine islands",
-  // "Aloft" = up in the air — packages carried over water and mountains.
+  tagline: "Fast. Smart. Delivered by air.",
+  // "Aloft" = up in the air — on-demand drone delivery.
   description:
-    "Aloft is a Philippine drone-delivery platform built on DJI FlyCart aircraft — " +
-    "moving medicine, supplies, and documents across islands and mountains where roads are slow.",
+    "Aloft is a Philippine on-demand drone-delivery platform built on DJI FlyCart aircraft — " +
+    "food, groceries, parcels, and medicine flown door-to-door, including islands and rural " +
+    "areas where roads are slow.",
   locale: "en-PH",
   currency: "PHP",
   currencySymbol: "₱",
@@ -17,10 +18,10 @@ export const siteConfig = {
   useCase: "island-rural-last-mile" as const,
   roles: ["customer", "merchant", "operator"] as const,
   colors: {
-    // Sky + island palette
-    brand: "#0EA5E9", // sky-500
-    brandDark: "#0369A1", // sky-700
-    accent: "#F59E0B", // amber-500
+    // Emerald "delivered by air" palette
+    brand: "#0f9d77", // emerald
+    brandDark: "#0a7d5e", // emerald-strong
+    accent: "#f59e0b", // amber
   },
 } as const;
 

@@ -1,25 +1,59 @@
-import { getCorridors } from "@/lib/data";
+import { getCorridors, getOrder, getDropSites } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui";
 import { DemoBanner } from "@/components/status";
-import { BookingForm } from "./BookingForm";
+import { BookingForm, type BookingRoute, type BookingInitial } from "./BookingForm";
 
-export default async function NewDeliveryPage() {
-  const corridors = await getCorridors();
+export default async function NewDeliveryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reorder?: string }>;
+}) {
+  const [{ reorder }, corridors, sites] = await Promise.all([
+    searchParams,
+    getCorridors(),
+    getDropSites(),
+  ]);
+  const siteName = (id: string) => sites.find((s) => s.id === id)?.name ?? "—";
+
+  const routes: BookingRoute[] = corridors.map((c) => ({
+    id: c.id,
+    fromName: siteName(c.originSiteId),
+    toName: siteName(c.destSiteId),
+    distanceKm: c.distanceKm,
+  }));
+
+  // Re-order: prefill from a past delivery.
+  let initial: BookingInitial | undefined;
+  if (reorder) {
+    const order = await getOrder(reorder);
+    if (order) {
+      const corridor = corridors.find(
+        (c) => c.originSiteId === order.originSiteId && c.destSiteId === order.destSiteId,
+      );
+      initial = {
+        corridorId: corridor?.id,
+        category: order.category ?? undefined,
+        cargo: order.cargoDescription,
+        weight: order.weightKg,
+        priority: order.priority,
+      };
+    }
+  }
 
   return (
     <>
       <DemoBanner show={!isSupabaseConfigured()} />
       <PageHeader
-        title="Send a package"
-        subtitle="Tell us what and where — we&apos;ll show the price before you confirm."
+        title={reorder ? "Send again" : "Book a delivery"}
+        subtitle="Fly it. Today!"
       />
-      {corridors.length === 0 ? (
+      {routes.length === 0 ? (
         <p className="text-sm text-muted">
-          No approved corridors yet. Ask your operator to set up a BVLOS route.
+          No approved routes yet. Ask your operator to set up a service area.
         </p>
       ) : (
-        <BookingForm corridors={corridors} />
+        <BookingForm routes={routes} initial={initial} />
       )}
     </>
   );
