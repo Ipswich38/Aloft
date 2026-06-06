@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* ─── Design tokens ──────────────────────────────────────────────────────
+   Premium, approachable, accessible. Near-black "ink" primary for strong
+   contrast (WCAG AA), sky as the brand accent, warm-neutral canvas. */
+@theme {
+  /* Brand (sky) */
+  --color-brand: #0284c7; /* sky-600 — identity */
+  --color-brand-strong: #0369a1; /* sky-700 — accessible on white text */
+  --color-brand-soft: #e0f2fe; /* sky-100 — tints, active states */
+  --color-accent: #f59e0b; /* amber — payload / cargo highlight */
+
+  /* Neutrals */
+  --color-ink: #0b1220; /* primary text + primary buttons */
+  --color-ink-soft: #475569; /* secondary text */
+  --color-muted: #8a93a3; /* tertiary text */
+  --color-canvas: #f7f7f5; /* warm app background */
+  --color-surface: #ffffff; /* cards */
+  --color-line: #e9e9e6; /* hairlines / borders */
+
+  /* Radii */
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.5rem;
+
+  /* Soft, premium shadows */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+  --shadow-pop: 0 8px 40px -12px rgba(15, 23, 42, 0.22);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Remove the grey tap flash on mobile for a native feel */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Headings read as confident + calm */
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Accessible focus: visible ring only for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-brand-soft);
+  color: var(--color-ink);
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* iOS safe areas when installed as a PWA */
+@supports (padding: env(safe-area-inset-top)) {
+  .pwa-safe-top { padding-top: max(env(safe-area-inset-top), 0px); }
+  .pwa-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
+}
+
+/* Screen-reader-only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Subtle entrance used sparingly */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.35s ease both; }

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- full-bleed background for maskable safe zone -->
+  <rect width="512" height="512" fill="#0ea5e9"/>
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="256" y1="256" x2="176" y2="176"/>
+    <line x1="256" y1="256" x2="336" y2="176"/>
+    <line x1="256" y1="256" x2="176" y2="336"/>
+    <line x1="256" y1="256" x2="336" y2="336"/>
+    <circle cx="176" cy="176" r="26"/>
+    <circle cx="336" cy="176" r="26"/>
+    <circle cx="176" cy="336" r="26"/>
+    <circle cx="336" cy="336" r="26"/>
+  </g>
+  <rect x="230" y="248" width="52" height="44" rx="6" fill="#f59e0b"/>
+</svg>
