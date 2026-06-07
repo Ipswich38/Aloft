@@ -3,11 +3,10 @@ import Link from "next/link";
 import { getOrder, getDropSites, getCorridors } from "@/lib/data";
 import { Card, LinkButton } from "@/components/ui";
 import { RatingStars } from "@/components/TrackWidgets";
-import { CheckIcon, ChevronRightIcon, DroneIcon, SignalIcon, TruckIcon } from "@/components/icons";
+import { CheckIcon, ChevronRightIcon, DroneIcon, SignalIcon } from "@/components/icons";
 import { peso, shortDate } from "@/lib/format";
 import { FLYCART_SPECS, estimateFlightMinutes } from "@/lib/flycart";
 import { CATEGORY_LABELS } from "@/lib/categories";
-import { DELIVERY_MODE_COPY, estimateLandMinutes } from "@/lib/delivery-modes";
 import type { CSSProperties } from "react";
 import type { DropSite, Order, OrderStatus } from "@/lib/types";
 
@@ -37,10 +36,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
   const spec = FLYCART_SPECS.FC30;
   const distanceKm = corridor?.distanceKm ?? 0;
   const speedKmh = Math.round(spec.cruiseSpeedMs * 3.6);
-  const eta =
-    order.deliveryMode === "air"
-      ? estimateFlightMinutes("FC30", distanceKm)
-      : estimateLandMinutes(distanceKm);
+  const eta = estimateFlightMinutes("FC30", distanceKm);
   const stepIndex = STATUS_STEP[order.status];
   const origin = sites.find((s) => s.id === order.originSiteId);
   const destination = sites.find((s) => s.id === order.destSiteId);
@@ -52,8 +48,6 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
   const arrival = new Date(base.getTime() + (10 + eta) * 60000);
 
   const delivered = order.status === "delivered";
-  const VehicleIcon = order.deliveryMode === "air" ? DroneIcon : TruckIcon;
-  const modeCopy = DELIVERY_MODE_COPY[order.deliveryMode];
 
   return (
     <>
@@ -72,10 +66,10 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-strong p-5 text-white shadow-[var(--shadow-pop)]">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm/none text-white/70">Delivering by {modeCopy.title.toLowerCase()}</p>
+                <p className="text-sm/none text-white/70">Delivering by drone</p>
                 <p className="text-xl font-bold">{order.category ? CATEGORY_LABELS[order.category] : "package"}</p>
               </div>
-              <VehicleIcon size={56} className="text-white/90" />
+              <DroneIcon size={56} className="text-white/90" />
             </div>
 
             <div className="mt-5 rounded-2xl bg-white p-4 text-ink">
@@ -87,10 +81,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                   <p className="font-semibold text-ink">{distanceKm} km</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted">{order.deliveryMode === "air" ? "Speed" : "Mode"}</p>
-                  <p className="font-semibold text-ink">
-                    {order.deliveryMode === "air" ? `${speedKmh} km/h` : "Road courier"}
-                  </p>
+                  <p className="text-xs text-muted">Speed</p>
+                  <p className="font-semibold text-ink">{speedKmh} km/h</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
@@ -112,7 +104,6 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
               destination={destination}
               progress={routeProgress}
               distanceKm={distanceKm}
-              mode={order.deliveryMode}
             />
           )}
 
@@ -151,22 +142,16 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand-strong">
-                  <VehicleIcon size={24} />
+                  <DroneIcon size={24} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-ink">
-                    {order.deliveryMode === "air" ? spec.name : "Land courier"}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {order.deliveryMode === "air" ? "Assigned aircraft" : "Assigned transport"}
-                  </p>
+                  <p className="text-sm font-semibold text-ink">{spec.name}</p>
+                  <p className="text-xs text-muted">Assigned aircraft</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs text-muted">{order.deliveryMode === "air" ? "Battery" : "Status"}</p>
-                <p className="text-sm font-semibold text-brand-strong">
-                  {order.deliveryMode === "air" ? "78%" : "On route"}
-                </p>
+                <p className="text-xs text-muted">Battery</p>
+                <p className="text-sm font-semibold text-brand-strong">78%</p>
               </div>
             </div>
           </Card>
@@ -181,13 +166,11 @@ function RouteMap({
   destination,
   progress,
   distanceKm,
-  mode,
 }: {
   origin: DropSite;
   destination: DropSite;
   progress: number;
   distanceKm: number;
-  mode: "air" | "land";
 }) {
   const latMin = Math.min(origin.lat, destination.lat);
   const latMax = Math.max(origin.lat, destination.lat);
@@ -245,12 +228,12 @@ function RouteMap({
           style={mapPointStyle(drone)}
           aria-label="Current drone position"
         >
-          {mode === "air" ? <DroneIcon size={22} /> : <TruckIcon size={22} />}
+          <DroneIcon size={22} />
         </div>
 
         <div className="absolute bottom-4 left-4 rounded-xl border border-white/70 bg-white/90 px-3 py-2 shadow-[var(--shadow-card)] backdrop-blur">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
-            {mode === "air" ? "Live corridor" : "Land route"}
+            Live corridor
           </p>
           <p className="text-sm font-semibold text-ink">{distanceKm} km</p>
         </div>
@@ -308,11 +291,7 @@ function DeliveredView({
   return (
     <>
       <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-strong p-6 text-center text-white shadow-[var(--shadow-pop)]">
-        {order.deliveryMode === "air" ? (
-          <DroneIcon size={56} className="mx-auto text-white/90" />
-        ) : (
-          <TruckIcon size={56} className="mx-auto text-white/90" />
-        )}
+        <DroneIcon size={56} className="mx-auto text-white/90" />
         <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand-strong">
           <CheckIcon size={26} />
         </div>

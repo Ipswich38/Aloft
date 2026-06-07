@@ -1,13 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useState, type ReactNode } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { createOrder, type BookingState } from "../actions";
 import { Button, Card, StickyBar, inputClass } from "@/components/ui";
-import { ClockIcon, UtensilsIcon, BagIcon, BoxIcon, CrossIcon, DroneIcon, TruckIcon } from "@/components/icons";
+import { ClockIcon, UtensilsIcon, BagIcon, BoxIcon, CrossIcon } from "@/components/icons";
 import { checkPayload, estimateFlightMinutes, FLYCART_SPECS } from "@/lib/flycart";
 import { quote } from "@/lib/pricing";
 import { peso } from "@/lib/format";
-import { DELIVERY_MODE_COPY, estimateLandMinutes, LAND_MAX_WEIGHT_KG, type DeliveryMode } from "@/lib/delivery-modes";
 import {
   DELIVERY_CATEGORIES,
   WEIGHT_TIERS,
@@ -23,7 +22,6 @@ export interface BookingRoute {
 export interface BookingInitial {
   corridorId?: string;
   category?: DeliveryCategoryId;
-  deliveryMode?: DeliveryMode;
   cargo?: string;
   weight?: number;
   priority?: boolean;
@@ -53,7 +51,6 @@ export function BookingForm({
   const [state, action, pending] = useActionState<BookingState, FormData>(createOrder, undefined);
   const [corridorId, setCorridorId] = useState(initial?.corridorId ?? routes[0]?.id ?? "");
   const [category, setCategory] = useState<DeliveryCategoryId>(initial?.category ?? "food");
-  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>(initial?.deliveryMode ?? "air");
   const [weight, setWeight] = useState(initial?.weight ?? 1);
   const [coldChain, setColdChain] = useState(false);
   const [priority, setPriority] = useState(initial?.priority ?? false);
@@ -63,49 +60,21 @@ export function BookingForm({
 
   const check = useMemo(() => {
     if (!route) return null;
-    if (deliveryMode === "land") {
-      return {
-        ok: weight > 0 && weight <= LAND_MAX_WEIGHT_KG,
-        reasons:
-          weight > LAND_MAX_WEIGHT_KG
-            ? [`Land courier limit is ${LAND_MAX_WEIGHT_KG} kg for this route.`]
-            : [],
-      };
-    }
     return checkPayload({ model: "FC30", weightKg: weight, distanceKm: route.distanceKm, roundTrip: false });
-  }, [deliveryMode, route, weight]);
+  }, [route, weight]);
 
   const price = route
-    ? quote({ distanceKm: route.distanceKm, weightKg: weight, mode: deliveryMode, coldChain, priority })
+    ? quote({ distanceKm: route.distanceKm, weightKg: weight, mode: "air", coldChain, priority })
     : null;
-  const eta = route
-    ? deliveryMode === "air"
-      ? estimateFlightMinutes("FC30", route.distanceKm)
-      : estimateLandMinutes(route.distanceKm)
-    : null;
+  const eta = route ? estimateFlightMinutes("FC30", route.distanceKm) : null;
   const weightPct = Math.min(100, Math.round((weight / spec.plannedPayloadKg) * 100));
 
   return (
     <form action={action}>
       <input type="hidden" name="category" value={category} />
-      <input type="hidden" name="deliveryMode" value={deliveryMode} />
+      <input type="hidden" name="deliveryMode" value="air" />
 
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-2">
-          <ModeButton
-            mode="air"
-            selected={deliveryMode === "air"}
-            onClick={() => setDeliveryMode("air")}
-            icon={<DroneIcon size={22} />}
-          />
-          <ModeButton
-            mode="land"
-            selected={deliveryMode === "land"}
-            onClick={() => setDeliveryMode("land")}
-            icon={<TruckIcon size={22} />}
-          />
-        </div>
-
         {/* Category */}
         <div className="grid grid-cols-4 gap-2">
           {DELIVERY_CATEGORIES.map((c) => {
@@ -247,7 +216,6 @@ export function BookingForm({
             <p className="text-2xl font-bold tracking-tight text-ink">{peso(price)}</p>
             <p className="flex items-center gap-1 text-xs text-muted">
               <ClockIcon size={13} /> ~{eta ?? "—"} min · {spec.name}
-              {deliveryMode === "land" && <span className="ml-1 font-semibold text-brand-strong">· Land</span>}
               {priority && <span className="ml-1 font-semibold text-brand-strong">· Priority</span>}
             </p>
           </div>
@@ -257,42 +225,6 @@ export function BookingForm({
         </div>
       </StickyBar>
     </form>
-  );
-}
-
-function ModeButton({
-  mode,
-  selected,
-  onClick,
-  icon,
-}: {
-  mode: DeliveryMode;
-  selected: boolean;
-  onClick: () => void;
-  icon: ReactNode;
-}) {
-  const copy = DELIVERY_MODE_COPY[mode];
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={`flex min-h-24 items-start gap-3 rounded-2xl border p-4 text-left transition ${
-        selected ? "border-ink bg-canvas" : "border-line bg-surface hover:border-ink/30"
-      }`}
-    >
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-          selected ? "bg-ink text-white" : "bg-brand-soft text-brand-strong"
-        }`}
-      >
-        {icon}
-      </span>
-      <span>
-        <span className="block text-sm font-semibold text-ink">{copy.title}</span>
-        <span className="mt-0.5 block text-xs leading-snug text-muted">{copy.subtitle}</span>
-      </span>
-    </button>
   );
 }
 

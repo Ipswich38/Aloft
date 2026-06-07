@@ -20,9 +20,8 @@ export default async function OperatorOverview() {
   const activeDrones = drones.filter((d) => d.status === "active").length;
   const airborne = flights.filter((f) => f.status === "airborne" || f.status === "dispatched").length;
   const pendingOrders = orders.filter((o) =>
-    ["submitted", "accepted"].includes(o.status),
+    o.deliveryMode === "air" && ["submitted", "accepted"].includes(o.status),
   ).length;
-  const landOrders = orders.filter((o) => o.deliveryMode === "land" && ["submitted", "accepted"].includes(o.status)).length;
 
   const roc = creds.find((c) => c.kind === "operator_roc");
   const insurance = creds.find((c) => c.kind === "insurance");
@@ -39,11 +38,10 @@ export default async function OperatorOverview() {
         action={<LinkButton href="/operator/flights">Plan a flight</LinkButton>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Active drones" value={`${activeDrones}/${drones.length}`} />
         <Stat label="In the air" value={String(airborne)} />
         <Stat label="Pending orders" value={String(pendingOrders)} />
-        <Stat label="Land queue" value={String(landOrders)} />
         <Stat label="Licensed pilots" value={String(pilots.filter((p) => isValidDate(p.rplExpiry)).length)} />
       </div>
 

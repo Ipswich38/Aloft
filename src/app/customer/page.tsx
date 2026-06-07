@@ -3,7 +3,7 @@ import { getOrders, getDropSites } from "@/lib/data";
 import { getSessionProfile } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { Card } from "@/components/ui";
-import { DeliveryModeBadge, OrderStatusBadge, DemoBanner } from "@/components/status";
+import { OrderStatusBadge, DemoBanner } from "@/components/status";
 import { SendIcon, ChevronRightIcon, BoxIcon } from "@/components/icons";
 import { peso, shortDate } from "@/lib/format";
 import type { Order } from "@/lib/types";
@@ -78,7 +78,6 @@ export default async function CustomerHome() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <OrderStatusBadge status={o.status} />
-                      <DeliveryModeBadge mode={o.deliveryMode} />
                     </div>
                     <span className="text-xs text-muted">{shortDate(o.createdAt)}</span>
                   </div>
@@ -124,7 +123,7 @@ export default async function CustomerHome() {
                 <Link href={`/customer/track/${o.id}`} className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{o.cargoDescription}</p>
                   <p className="truncate text-xs text-muted">
-                    {siteName(o.originSiteId)} → {siteName(o.destSiteId)} · {o.deliveryMode === "air" ? "Air" : "Land"} · {peso(o.priceCentavos)}
+                    {siteName(o.originSiteId)} → {siteName(o.destSiteId)} · {peso(o.priceCentavos)}
                   </p>
                 </Link>
                 <OrderStatusBadge status={o.status} />
