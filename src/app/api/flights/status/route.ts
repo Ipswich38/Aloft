@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { flightProvider } from "@/lib/flight-provider";
+import { availableFlightProviders, flightProvider } from "@/lib/flight-provider";
 import { applyDemoFlightStatus } from "@/lib/demo-store";
 import { createAdminClient, isAdminConfigured } from "@/lib/supabase/admin";
 import type { FlightStatus, OrderStatus } from "@/lib/types";
@@ -42,7 +42,12 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  const update = flightProvider.parseStatus(body);
+  const providers = [
+    flightProvider,
+    ...Object.values(availableFlightProviders).filter((p) => p.id !== flightProvider.id),
+  ];
+  const provider = providers.find((p) => p.verifyWebhook(secret) && p.parseStatus(body));
+  const update = provider?.parseStatus(body) ?? null;
   if (!update) {
     return NextResponse.json({ error: "Unrecognized status payload" }, { status: 400 });
   }
@@ -103,6 +108,7 @@ export async function POST(req: Request) {
     action: "provider_status_update",
     detail: {
       provider: flightProvider.id,
+      parsed_by: provider?.id ?? flightProvider.id,
       job_id: update.jobId,
       status: update.status,
       note: update.note ?? null,

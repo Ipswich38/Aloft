@@ -131,7 +131,8 @@ export function FlightPlanner({
           {state.ok ? (
             <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
               <strong>✓ Cleared &amp; dispatched.</strong> DeliveryHub job{" "}
-              <span className="font-mono">{state.jobId}</span>. {state.message}
+              <span className="font-mono">{state.jobId}</span>
+              {state.provider && <span> via {state.provider}</span>}. {state.message}
             </div>
           ) : (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

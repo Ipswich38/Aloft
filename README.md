@@ -41,6 +41,12 @@ Both go through a vendor-neutral **`FlightProvider`** interface (`src/lib/flight
 so DJI is the *only* vendor-specific code and can be swapped without touching the app.
 Dispatch is simulated until `DELIVERYHUB_*` env vars are set.
 
+Provider selection is controlled by `FLIGHT_PROVIDER`:
+
+- `simulated` — internal simulator for demos and local testing.
+- `deliveryhub` — REST-style DJI DeliveryHub handoff via `DELIVERYHUB_*`.
+- `dji-cloud-api` — scaffold for DJI Cloud API / Pilot 2 / Dock credentials via `DJI_CLOUD_*`.
+
 ### Compliance — CAAP gates the business
 FlyCart (25–95 kg) sits in CAAP's **7–150 kg** class, which requires:
 - **Drone registration** with CAAP

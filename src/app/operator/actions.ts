@@ -28,6 +28,7 @@ export interface DispatchState {
   blockers?: string[];
   warnings?: string[];
   jobId?: string;
+  provider?: string;
   message?: string;
 }
 
@@ -171,6 +172,7 @@ export async function planAndDispatch(
     ok: true,
     warnings: gate.warnings,
     jobId: handoff.jobId,
+    provider: flightProvider.id,
     message: handoff.message,
   };
 }

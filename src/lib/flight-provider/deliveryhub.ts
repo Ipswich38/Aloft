@@ -15,31 +15,7 @@ import type {
   FlightProvider,
   NormalizedStatusUpdate,
 } from "./types";
-
-/** Map DeliveryHub's raw status strings → Aloft's normalized states. */
-function mapStatus(raw: string): NormalizedStatusUpdate["status"] | null {
-  switch (raw.toLowerCase()) {
-    case "dispatched":
-    case "accepted":
-    case "preparing":
-      return "dispatched";
-    case "airborne":
-    case "in_flight":
-    case "enroute":
-    case "delivering":
-      return "airborne";
-    case "completed":
-    case "delivered":
-    case "returned":
-      return "completed";
-    case "aborted":
-    case "failed":
-    case "cancelled":
-      return "aborted";
-    default:
-      return null;
-  }
-}
+import { mapProviderStatus } from "./status";
 
 export const deliveryHubProvider: FlightProvider = {
   id: "deliveryhub",
@@ -79,7 +55,7 @@ export const deliveryHubProvider: FlightProvider = {
 
     const data = (await res.json()) as { job_id?: string };
     return {
-      jobId: data.job_id ?? "",
+      jobId: data.job_id ?? payload.flightId,
       accepted: true,
       message: "Flight handed to DeliveryHub.",
     };
@@ -99,7 +75,7 @@ export const deliveryHubProvider: FlightProvider = {
     const jobId = (b.job_id ?? b.jobId) as string | undefined;
     const rawStatus = (b.status ?? b.event) as string | undefined;
     if (!jobId || !rawStatus) return null;
-    const status = mapStatus(String(rawStatus));
+    const status = mapProviderStatus(String(rawStatus));
     if (!status) return null;
     return {
       jobId,
