@@ -60,7 +60,7 @@ export function BookingForm({
 
   const check = useMemo(() => {
     if (!route) return null;
-    return checkPayload({ model: "FC30", weightKg: weight, distanceKm: route.distanceKm, roundTrip: true });
+    return checkPayload({ model: "FC30", weightKg: weight, distanceKm: route.distanceKm, roundTrip: false });
   }, [route, weight]);
 
   const price = route

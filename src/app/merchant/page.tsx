@@ -46,7 +46,7 @@ export default async function MerchantQueue() {
               model: "FC30",
               weightKg: o.weightKg,
               distanceKm: distanceFor(o),
-              roundTrip: true,
+              roundTrip: false,
             });
             return (
               <Card key={o.id}>

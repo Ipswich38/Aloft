@@ -3,11 +3,10 @@ import {
   demoCorridors,
   demoDrones,
   demoDropSites,
-  demoFlights,
   demoOperatorCredentials,
-  demoOrders,
   demoPilots,
 } from "./demo-data";
+import { getDemoFlights, getDemoOrder, getDemoOrders } from "./demo-store";
 import type { Corridor, Drone, DropSite, Order, Pilot } from "./types";
 
 /**
@@ -44,7 +43,7 @@ export async function getCorridors(): Promise<Corridor[]> {
 }
 
 export async function getOrders(): Promise<Order[]> {
-  if (!isSupabaseConfigured()) return demoOrders;
+  if (!isSupabaseConfigured()) return getDemoOrders();
   const supabase = await createClient();
   const { data } = await supabase
     .from("orders")
@@ -54,7 +53,7 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function getOrder(id: string): Promise<Order | null> {
-  if (!isSupabaseConfigured()) return demoOrders.find((o) => o.id === id) ?? null;
+  if (!isSupabaseConfigured()) return getDemoOrder(id);
   const supabase = await createClient();
   const { data } = await supabase.from("orders").select("*").eq("id", id).single();
   return data ? mapOrder(data) : null;
@@ -73,7 +72,7 @@ export async function getOperatorCredentials() {
 }
 
 export async function getFlights() {
-  if (!isSupabaseConfigured()) return demoFlights;
+  if (!isSupabaseConfigured()) return getDemoFlights();
   const supabase = await createClient();
   const { data } = await supabase
     .from("flights")

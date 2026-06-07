@@ -2,11 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { setDemoOrderStatus } from "@/lib/demo-store";
 
 async function setOrderStatus(orderId: string, status: "accepted" | "rejected") {
   if (!isSupabaseConfigured()) {
-    // Demo mode: no persistence, just refresh the view.
+    await setDemoOrderStatus(orderId, status);
     revalidatePath("/merchant");
+    revalidatePath("/customer");
+    revalidatePath(`/customer/track/${orderId}`);
     return;
   }
   const supabase = await createClient();

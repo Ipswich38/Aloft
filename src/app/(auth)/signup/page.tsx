@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { signup, type AuthState } from "../actions";
+import { signInWithGoogle, signup, type AuthState } from "../actions";
 import { Button, Field, inputClass } from "@/components/ui";
 import { siteConfig } from "@/lib/site-config";
 import { SendIcon, BoxIcon, ShieldIcon, CheckIcon } from "@/components/icons";
@@ -33,7 +33,7 @@ export default function SignupPage() {
           <h1 className="text-xl font-bold tracking-tight text-ink">Create your account</h1>
           <p className="mb-5 mt-1 text-sm text-ink-soft">How will you use Aloft?</p>
 
-          <form action={action} className="space-y-4">
+          <div className="space-y-4">
             <div className="grid gap-2.5">
               {siteConfig.roles.map((r) => {
                 const selected = role === r;
@@ -73,30 +73,51 @@ export default function SignupPage() {
               })}
             </div>
 
-            <Field label="Full name">
-              <input name="fullName" required className={inputClass} />
-            </Field>
-            {role !== "customer" && (
-              <Field label="Organization name">
-                <input name="orgName" className={inputClass} />
-              </Field>
-            )}
-            <Field label="Email">
-              <input name="email" type="email" autoComplete="email" required className={inputClass} />
-            </Field>
-            <Field label="Password" hint="At least 6 characters.">
-              <input name="password" type="password" autoComplete="new-password" required className={inputClass} />
-            </Field>
+            <form action={signInWithGoogle}>
+              <input type="hidden" name="role" value={role} />
+              <input type="hidden" name="next" value={`/${role}`} />
+              <button
+                type="submit"
+                className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-canvas"
+              >
+                <span className="text-base font-bold text-[#4285f4]">G</span>
+                Continue with Google
+              </button>
+            </form>
 
-            {state?.error && (
-              <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {state.error}
-              </div>
-            )}
-            <Button type="submit" size="lg" disabled={pending} className="w-full">
-              {pending ? "Creating account…" : "Create account"}
-            </Button>
-          </form>
+            <div className="flex items-center gap-3">
+              <span className="h-px flex-1 bg-line" />
+              <span className="text-xs font-medium text-muted">or</span>
+              <span className="h-px flex-1 bg-line" />
+            </div>
+
+            <form action={action} className="space-y-4">
+              <input type="hidden" name="role" value={role} />
+              <Field label="Full name">
+                <input name="fullName" required className={inputClass} />
+              </Field>
+              {role !== "customer" && (
+                <Field label="Organization name">
+                  <input name="orgName" className={inputClass} />
+                </Field>
+              )}
+              <Field label="Email">
+                <input name="email" type="email" autoComplete="email" required className={inputClass} />
+              </Field>
+              <Field label="Password" hint="At least 6 characters.">
+                <input name="password" type="password" autoComplete="new-password" required className={inputClass} />
+              </Field>
+
+              {state?.error && (
+                <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {state.error}
+                </div>
+              )}
+              <Button type="submit" size="lg" disabled={pending} className="w-full">
+                {pending ? "Creating account…" : "Create account"}
+              </Button>
+            </form>
+          </div>
         </div>
         <p className="mt-5 text-center text-sm text-ink-soft">
           Already have an account?{" "}

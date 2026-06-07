@@ -7,12 +7,17 @@ import { CheckIcon, ChevronRightIcon, DroneIcon, SignalIcon } from "@/components
 import { peso, shortDate } from "@/lib/format";
 import { FLYCART_SPECS, estimateFlightMinutes } from "@/lib/flycart";
 import { CATEGORY_LABELS } from "@/lib/categories";
-import type { Order, OrderStatus } from "@/lib/types";
+import type { CSSProperties } from "react";
+import type { DropSite, Order, OrderStatus } from "@/lib/types";
 
 const STEPS = ["Order Confirmed", "Drone Assigned", "Picked Up", "In Transit", "Delivered"] as const;
 const STATUS_STEP: Record<OrderStatus, number> = {
   draft: -1, submitted: 0, accepted: 1, scheduled: 2, in_flight: 3, delivered: 4,
   cancelled: 99, rejected: 99,
+};
+const STATUS_PROGRESS: Record<OrderStatus, number> = {
+  draft: 0, submitted: 0.08, accepted: 0.18, scheduled: 0.32, in_flight: 0.62, delivered: 1,
+  cancelled: 0, rejected: 0,
 };
 
 function fmtTime(d: Date) {
@@ -33,6 +38,9 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
   const speedKmh = Math.round(spec.cruiseSpeedMs * 3.6);
   const eta = estimateFlightMinutes("FC30", distanceKm);
   const stepIndex = STATUS_STEP[order.status];
+  const origin = sites.find((s) => s.id === order.originSiteId);
+  const destination = sites.find((s) => s.id === order.destSiteId);
+  const routeProgress = STATUS_PROGRESS[order.status];
 
   const base = new Date(order.createdAt);
   const stepOffsets = [0, 1, 8, 10, 10 + eta]; // minutes from booking
@@ -64,14 +72,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
               <DroneIcon size={56} className="text-white/90" />
             </div>
 
-            {/* faux flight path */}
-            <div className="my-5 flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-white" />
-              <span className="flex-1 border-t-2 border-dashed border-white/50" />
-              <span className="h-2.5 w-2.5 rounded-full bg-accent ring-4 ring-white/20" />
-            </div>
-
-            <div className="rounded-2xl bg-white p-4 text-ink">
+            <div className="mt-5 rounded-2xl bg-white p-4 text-ink">
               <p className="text-xs font-medium text-muted">Estimated arrival</p>
               <p className="text-2xl font-bold tracking-tight text-brand-strong">{fmtTime(arrival)}</p>
               <div className="mt-3 grid grid-cols-2 gap-3 border-t border-line pt-3 text-sm">
@@ -96,6 +97,15 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           </div>
+
+          {origin && destination && (
+            <RouteMap
+              origin={origin}
+              destination={destination}
+              progress={routeProgress}
+              distanceKm={distanceKm}
+            />
+          )}
 
           {/* Status timeline */}
           <Card className="mt-4">
@@ -149,6 +159,124 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
       )}
     </>
   );
+}
+
+function RouteMap({
+  origin,
+  destination,
+  progress,
+  distanceKm,
+}: {
+  origin: DropSite;
+  destination: DropSite;
+  progress: number;
+  distanceKm: number;
+}) {
+  const latMin = Math.min(origin.lat, destination.lat);
+  const latMax = Math.max(origin.lat, destination.lat);
+  const lngMin = Math.min(origin.lng, destination.lng);
+  const lngMax = Math.max(origin.lng, destination.lng);
+  const latRange = Math.max(latMax - latMin, 0.01);
+  const lngRange = Math.max(lngMax - lngMin, 0.01);
+
+  const pointFor = (site: DropSite) => ({
+    x: 15 + ((site.lng - lngMin) / lngRange) * 70,
+    y: 20 + (1 - (site.lat - latMin) / latRange) * 60,
+  });
+
+  const start = pointFor(origin);
+  const end = pointFor(destination);
+  const drone = {
+    x: start.x + (end.x - start.x) * progress,
+    y: start.y + (end.y - start.y) * progress,
+  };
+
+  return (
+    <Card className="mt-4 overflow-hidden p-0">
+      <div className="relative aspect-[1.55] min-h-56 bg-[#e8f3ef]">
+        <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(90deg,rgba(15,157,119,0.12)_1px,transparent_1px),linear-gradient(rgba(15,157,119,0.12)_1px,transparent_1px)] [background-size:28px_28px]" />
+        <div className="absolute -left-12 top-12 h-36 w-48 rounded-full bg-white/60 blur-2xl" />
+        <div className="absolute bottom-4 right-5 h-28 w-44 rounded-[45%] bg-brand-soft/75 blur-xl" />
+
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+          <line
+            x1={start.x}
+            y1={start.y}
+            x2={end.x}
+            y2={end.y}
+            stroke="rgba(11,18,32,0.16)"
+            strokeWidth="2"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+          />
+          <line
+            x1={start.x}
+            y1={start.y}
+            x2={drone.x}
+            y2={drone.y}
+            stroke="var(--color-brand)"
+            strokeWidth="2.75"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        <MapPin point={start} label={origin.name} align="left" tone="origin" />
+        <MapPin point={end} label={destination.name} align="right" tone="destination" />
+
+        <div
+          className="absolute z-10 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ink text-white shadow-[var(--shadow-pop)] ring-4 ring-white"
+          style={mapPointStyle(drone)}
+          aria-label="Current drone position"
+        >
+          <DroneIcon size={22} />
+        </div>
+
+        <div className="absolute bottom-4 left-4 rounded-xl border border-white/70 bg-white/90 px-3 py-2 shadow-[var(--shadow-card)] backdrop-blur">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Live corridor</p>
+          <p className="text-sm font-semibold text-ink">{distanceKm} km</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function MapPin({
+  point,
+  label,
+  align,
+  tone,
+}: {
+  point: { x: number; y: number };
+  label: string;
+  align: "left" | "right";
+  tone: "origin" | "destination";
+}) {
+  return (
+    <div
+      className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+      style={mapPointStyle(point)}
+    >
+      <span
+        className={`block h-4 w-4 rounded-full ring-4 ring-white ${
+          tone === "origin" ? "bg-ink" : "bg-accent"
+        }`}
+      />
+      <span
+        className={`absolute top-5 max-w-36 rounded-lg border border-white/70 bg-white/90 px-2.5 py-1.5 text-xs font-semibold leading-tight text-ink shadow-[var(--shadow-card)] ${
+          align === "left" ? "left-0" : "right-0 text-right"
+        }`}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function mapPointStyle(point: { x: number; y: number }): CSSProperties {
+  return {
+    left: `${point.x}%`,
+    top: `${point.y}%`,
+  };
 }
 
 function DeliveredView({

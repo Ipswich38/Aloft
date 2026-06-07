@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { getCorridors } from "@/lib/data";
+import { createDemoOrder } from "@/lib/demo-store";
 import { checkPayload } from "@/lib/flycart";
 import { quote } from "@/lib/pricing";
 import { CATEGORY_LABELS } from "@/lib/categories";
@@ -42,7 +43,7 @@ export async function createOrder(
     model: "FC30",
     weightKg: parsed.data.weightKg,
     distanceKm: corridor.distanceKm,
-    roundTrip: true,
+    roundTrip: false,
   });
   if (!check.ok) return { error: check.reasons.join(" ") };
 
@@ -57,7 +58,16 @@ export async function createOrder(
     parsed.data.cargoDescription?.trim() || CATEGORY_LABELS[parsed.data.category];
 
   if (!isSupabaseConfigured()) {
-    redirect("/customer?booked=demo");
+    const order = await createDemoOrder({
+      originSiteId: corridor.originSiteId,
+      destSiteId: corridor.destSiteId,
+      category: parsed.data.category,
+      cargoDescription: cargo,
+      weightKg: parsed.data.weightKg,
+      priority: isPriority,
+      priceCentavos,
+    });
+    redirect(`/customer/track/${order.id}?booked=demo`);
   }
 
   const supabase = await createClient();

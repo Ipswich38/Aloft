@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { planAndDispatch, type DispatchState } from "../actions";
 import { Button, Card, Field, inputClass } from "@/components/ui";
 import type { Corridor, Drone, Pilot, Order } from "@/lib/types";
@@ -22,6 +22,15 @@ export function FlightPlanner({
   );
   const activeDrones = drones.filter((d) => d.status === "active");
   const [alt, setAlt] = useState(100);
+  const [orderId, setOrderId] = useState("");
+  const [corridorId, setCorridorId] = useState(corridors[0]?.id ?? "");
+  const orderRoute = useMemo(() => {
+    const order = acceptedOrders.find((o) => o.id === orderId);
+    if (!order) return null;
+    return corridors.find(
+      (c) => c.originSiteId === order.originSiteId && c.destSiteId === order.destSiteId,
+    ) ?? null;
+  }, [acceptedOrders, corridors, orderId]);
 
   return (
     <Card>
@@ -32,7 +41,22 @@ export function FlightPlanner({
 
       <form action={action} className="mt-4 grid gap-4 sm:grid-cols-2">
         <Field label="Order (optional)">
-          <select name="orderId" className={inputClass} defaultValue="">
+          <select
+            name="orderId"
+            className={inputClass}
+            value={orderId}
+            onChange={(event) => {
+              const nextOrderId = event.target.value;
+              setOrderId(nextOrderId);
+              const order = acceptedOrders.find((o) => o.id === nextOrderId);
+              const route = order
+                ? corridors.find(
+                    (c) => c.originSiteId === order.originSiteId && c.destSiteId === order.destSiteId,
+                  )
+                : null;
+              if (route) setCorridorId(route.id);
+            }}
+          >
             <option value="">— none —</option>
             {acceptedOrders.map((o) => (
               <option key={o.id} value={o.id}>
@@ -43,13 +67,24 @@ export function FlightPlanner({
         </Field>
 
         <Field label="Corridor">
-          <select name="corridorId" required className={inputClass} defaultValue={corridors[0]?.id}>
+          <select
+            name="corridorId"
+            required
+            className={inputClass}
+            value={corridorId}
+            onChange={(event) => setCorridorId(event.target.value)}
+          >
             {corridors.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name} · {c.distanceKm} km
               </option>
             ))}
           </select>
+          {orderRoute && (
+            <p className="mt-1.5 text-xs text-muted">
+              Matched to selected order route: {orderRoute.name}.
+            </p>
+          )}
         </Field>
 
         <Field label="Drone">

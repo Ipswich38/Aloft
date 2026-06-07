@@ -4,32 +4,53 @@ import { useActionState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { login, type AuthState } from "../actions";
+import { login, signInWithGoogle, type AuthState } from "../actions";
 import { Button, Field, inputClass } from "@/components/ui";
 import { siteConfig } from "@/lib/site-config";
 
 function LoginForm() {
   const [state, action, pending] = useActionState<AuthState, FormData>(login, undefined);
-  const next = useSearchParams().get("next") ?? "/";
+  const params = useSearchParams();
+  const next = params.get("next") ?? "/";
+  const error = params.get("error");
 
   return (
-    <form action={action} className="space-y-4">
-      <input type="hidden" name="next" value={next} />
-      <Field label="Email">
-        <input name="email" type="email" autoComplete="email" required className={inputClass} />
-      </Field>
-      <Field label="Password">
-        <input name="password" type="password" autoComplete="current-password" required className={inputClass} />
-      </Field>
-      {state?.error && (
-        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {state.error}
-        </div>
-      )}
-      <Button type="submit" size="lg" disabled={pending} className="w-full">
-        {pending ? "Signing in…" : "Sign in"}
-      </Button>
-    </form>
+    <div className="space-y-4">
+      <form action={signInWithGoogle}>
+        <input type="hidden" name="next" value={next} />
+        <button
+          type="submit"
+          className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-canvas"
+        >
+          <span className="text-base font-bold text-[#4285f4]">G</span>
+          Continue with Google
+        </button>
+      </form>
+
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-line" />
+        <span className="text-xs font-medium text-muted">or</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <form action={action} className="space-y-4">
+        <input type="hidden" name="next" value={next} />
+        <Field label="Email">
+          <input name="email" type="email" autoComplete="email" required className={inputClass} />
+        </Field>
+        <Field label="Password">
+          <input name="password" type="password" autoComplete="current-password" required className={inputClass} />
+        </Field>
+        {(state?.error || error) && (
+          <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {state?.error ?? error}
+          </div>
+        )}
+        <Button type="submit" size="lg" disabled={pending} className="w-full">
+          {pending ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+    </div>
   );
 }
 

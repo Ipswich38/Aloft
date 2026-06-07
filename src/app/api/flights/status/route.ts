@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { flightProvider } from "@/lib/flight-provider";
+import { applyDemoFlightStatus } from "@/lib/demo-store";
 import { createAdminClient, isAdminConfigured } from "@/lib/supabase/admin";
 import type { FlightStatus, OrderStatus } from "@/lib/types";
 
@@ -48,15 +49,26 @@ export async function POST(req: Request) {
 
   const mapped = STATUS_MAP[update.status];
 
-  // 3. Demo mode: acknowledge but don't persist.
+  // 3. Demo mode: persist to the local file-backed demo store.
   if (!isAdminConfigured()) {
+    const flightId = await applyDemoFlightStatus({
+      jobId: update.jobId,
+      flightStatus: mapped.flight,
+      orderStatus: mapped.order,
+    });
+    if (!flightId) {
+      return NextResponse.json(
+        { error: `No demo flight found for job ${update.jobId}` },
+        { status: 404 },
+      );
+    }
     return NextResponse.json({
       ok: true,
       demo: true,
+      flightId,
       jobId: update.jobId,
-      wouldSetFlight: mapped.flight,
-      wouldSetOrder: mapped.order,
-      note: "Supabase service role not configured — event acknowledged, not persisted.",
+      status: mapped.flight,
+      orderStatus: mapped.order,
     });
   }
 

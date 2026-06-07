@@ -11,6 +11,7 @@ import {
   getDropSites,
   getOrders,
 } from "@/lib/data";
+import { dispatchDemoFlight } from "@/lib/demo-store";
 import { checkFlightCompliance } from "@/lib/compliance";
 import { flightProvider } from "@/lib/flight-provider";
 
@@ -79,6 +80,13 @@ export async function planAndDispatch(
   const dest = sites.find((s) => s.id === corridor.destSiteId);
   // Carry the real cargo weight when an order is attached.
   const order = orderId ? orders.find((o) => o.id === orderId) : undefined;
+  if (order && (order.originSiteId !== corridor.originSiteId || order.destSiteId !== corridor.destSiteId)) {
+    return {
+      ok: false,
+      blockers: ["Selected order does not match the selected corridor."],
+      warnings: gate.warnings,
+    };
+  }
   const handoff = await flightProvider.dispatch({
     flightId: `flt-${Date.now()}`,
     droneTail: drone.tailNumber,
@@ -94,7 +102,21 @@ export async function planAndDispatch(
     return { ok: false, blockers: [handoff.message], warnings: gate.warnings };
   }
 
-  if (isSupabaseConfigured()) {
+  if (!isSupabaseConfigured()) {
+    await dispatchDemoFlight({
+      corridorId,
+      droneId,
+      pilotId,
+      plannedAltM,
+      deliveryhubJobId: handoff.jobId,
+      orderId,
+    });
+    revalidatePath("/operator/flights");
+    revalidatePath("/operator");
+    revalidatePath("/merchant");
+    revalidatePath("/customer");
+    if (orderId) revalidatePath(`/customer/track/${orderId}`);
+  } else {
     const supabase = await createClient();
     const {
       data: { user },
