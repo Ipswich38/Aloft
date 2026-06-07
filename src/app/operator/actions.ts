@@ -80,6 +80,13 @@ export async function planAndDispatch(
   const dest = sites.find((s) => s.id === corridor.destSiteId);
   // Carry the real cargo weight when an order is attached.
   const order = orderId ? orders.find((o) => o.id === orderId) : undefined;
+  if (order && order.deliveryMode !== "air") {
+    return {
+      ok: false,
+      blockers: ["Selected order is a land delivery and cannot be dispatched as a drone flight."],
+      warnings: gate.warnings,
+    };
+  }
   if (order && (order.originSiteId !== corridor.originSiteId || order.destSiteId !== corridor.destSiteId)) {
     return {
       ok: false,

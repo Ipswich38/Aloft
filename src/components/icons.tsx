@@ -111,6 +111,18 @@ export function DroneIcon(p: IconProps) {
   );
 }
 
+export function TruckIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M3 7h11v10H3z" />
+      <path d="M14 11h3.5l3.5 3.5V17h-7" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="17" cy="18" r="2" />
+      <path d="M5 11h5" />
+    </svg>
+  );
+}
+
 export function BellIcon(p: IconProps) {
   return (
     <svg {...base(p)}>

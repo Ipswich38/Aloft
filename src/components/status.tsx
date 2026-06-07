@@ -1,5 +1,11 @@
 import { Badge } from "./ui";
-import { ORDER_STATUS_LABELS, type OrderStatus, type FlightStatus } from "@/lib/types";
+import {
+  ORDER_STATUS_LABELS,
+  type DeliveryMode,
+  type OrderStatus,
+  type FlightStatus,
+} from "@/lib/types";
+import { DELIVERY_MODE_LABELS } from "@/lib/delivery-modes";
 
 const orderTone: Record<OrderStatus, "slate" | "green" | "amber" | "red" | "sky"> = {
   draft: "slate",
@@ -38,6 +44,10 @@ const flightLabel: Record<FlightStatus, string> = {
 
 export function FlightStatusBadge({ status }: { status: FlightStatus }) {
   return <Badge tone={flightTone[status]}>{flightLabel[status]}</Badge>;
+}
+
+export function DeliveryModeBadge({ mode }: { mode: DeliveryMode }) {
+  return <Badge tone={mode === "air" ? "sky" : "green"}>{DELIVERY_MODE_LABELS[mode]}</Badge>;
 }
 
 export function DemoBanner({ show }: { show: boolean }) {

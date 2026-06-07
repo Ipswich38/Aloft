@@ -113,11 +113,21 @@ create table if not exists orders (
   cargo_description text not null,
   weight_kg         numeric(6,2) not null check (weight_kg > 0),
   priority          boolean not null default false,
+  delivery_mode     text not null default 'air'
+                    check (delivery_mode in ('air','land')),
   status            order_status not null default 'submitted',
   flight_id         uuid,
   price_centavos    integer,
   created_at        timestamptz not null default now()
 );
+
+alter table orders
+  add column if not exists delivery_mode text not null default 'air';
+
+alter table orders
+  drop constraint if exists orders_delivery_mode_check,
+  add constraint orders_delivery_mode_check
+  check (delivery_mode in ('air','land'));
 
 -- Flights (a dispatched mission carrying one or more orders) -----------------
 create table if not exists flights (

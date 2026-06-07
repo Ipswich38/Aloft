@@ -25,7 +25,7 @@ export default async function FlightsPage() {
   const pilotName = (id: string | null) =>
     pilots.find((p) => p.id === id)?.fullName ?? "—";
 
-  const acceptedOrders = orders.filter((o) => o.status === "accepted");
+  const acceptedOrders = orders.filter((o) => o.status === "accepted" && o.deliveryMode === "air");
 
   return (
     <>

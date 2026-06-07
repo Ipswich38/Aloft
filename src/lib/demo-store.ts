@@ -53,6 +53,7 @@ export async function createDemoOrder(input: {
   cargoDescription: string;
   weightKg: number;
   priority: boolean;
+  deliveryMode: Order["deliveryMode"];
   priceCentavos: number;
 }) {
   const store = await readStore();
@@ -67,6 +68,7 @@ export async function createDemoOrder(input: {
     cargoDescription: input.cargoDescription,
     weightKg: input.weightKg,
     priority: input.priority,
+    deliveryMode: input.deliveryMode,
     status: "submitted",
     flightId: null,
     priceCentavos: input.priceCentavos,

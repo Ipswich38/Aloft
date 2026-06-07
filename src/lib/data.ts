@@ -115,6 +115,7 @@ const mapOrder = (r: any): Order => ({
   category: r.category ?? null,
   cargoDescription: r.cargo_description, weightKg: Number(r.weight_kg),
   priority: !!r.priority,
+  deliveryMode: r.delivery_mode ?? "air",
   status: r.status, flightId: r.flight_id, priceCentavos: r.price_centavos,
   createdAt: r.created_at,
 });

@@ -34,6 +34,7 @@ export default async function NewDeliveryPage({
       initial = {
         corridorId: corridor?.id,
         category: order.category ?? undefined,
+        deliveryMode: order.deliveryMode,
         cargo: order.cargoDescription,
         weight: order.weightKg,
         priority: order.priority,

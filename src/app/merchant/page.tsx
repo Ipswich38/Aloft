@@ -1,7 +1,7 @@
 import { getOrders, getDropSites } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { Card, PageHeader } from "@/components/ui";
-import { OrderStatusBadge, DemoBanner } from "@/components/status";
+import { DeliveryModeBadge, OrderStatusBadge, DemoBanner } from "@/components/status";
 import { peso } from "@/lib/format";
 import { acceptOrder, rejectOrder } from "./actions";
 import { checkPayload } from "@/lib/flycart";
@@ -55,6 +55,7 @@ export default async function MerchantQueue() {
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-muted">{o.id}</span>
                       <OrderStatusBadge status={o.status} />
+                      <DeliveryModeBadge mode={o.deliveryMode} />
                       {!check.ok && (
                         <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
                           Payload issue
@@ -105,6 +106,7 @@ export default async function MerchantQueue() {
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-muted">{o.id}</span>
                     <OrderStatusBadge status={o.status} />
+                    <DeliveryModeBadge mode={o.deliveryMode} />
                   </div>
                   <p className="mt-1 font-semibold text-ink">{o.cargoDescription}</p>
                   <p className="text-sm text-muted">
